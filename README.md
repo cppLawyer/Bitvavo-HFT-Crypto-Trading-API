@@ -2,7 +2,8 @@
 Project Trading API Implementation in C++
 
 
-API_DOC_BITVAVO: https://docs.bitvavo.com/
+API_DOC_BITVAVO: https://docs.bitvavo.com/.
+
 Adapt to your specifications
 
 

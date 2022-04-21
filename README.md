@@ -1,4 +1,4 @@
-# bitvavo_api_c++_use
+# Project: Crypto_Trading_api_c++
 Project Trading API Implementation in C++
 
 

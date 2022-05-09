@@ -9,7 +9,6 @@ Adapt to your specifications
 
 - Program uses libCURL and openSSL.
 - Contains build ready binaries for windows (curl and openssl) "dll and static"
-- MSVC only
 - The program queries the server for the name and price of a cryptocurrency.
 - Program has in-built RequestLimit protection so your IP does not get banned by Bitvavo.
 
@@ -17,5 +16,5 @@ Adapt to your specifications
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 - I will add many more features into this project, such as trading and selling with a target, Automatic Trading Bot, 
 Advanced market indicator and predictor for Binance and other populair platforms.
-- Currently only for Windows, in the future I will extend it to Linux;), 
+- Currently only for Windows, in the future I will extend it to Linux ;), 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

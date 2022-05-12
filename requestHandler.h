@@ -14,7 +14,7 @@ class requestHandler {
 	inline constexpr bool aboveLimit() noexcept {
 		return (((int)((time_t)time(NULL) - start_time)) >= 60) ? true : false;
 	}
-	inline const constexpr bool aboveRequestCount() {
+	inline const constexpr bool aboveRequestCount() noexcept{
 		return (requestCount.load(std::memory_order_relaxed) >= 1000) ? true : false;
 	}
 	inline void reset_restart() noexcept {

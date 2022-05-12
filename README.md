@@ -8,7 +8,6 @@ Adapt to your specifications
 
 
 - Program uses libCURL and openSSL.
-- Contains build ready binaries for windows (curl and openssl) "dll and static"
 - The program queries the server for the name and price of a cryptocurrency.
 - Program has in-built RequestLimit protection so your IP does not get banned by Bitvavo.
 

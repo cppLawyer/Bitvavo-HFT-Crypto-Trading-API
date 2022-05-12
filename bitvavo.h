@@ -8,6 +8,7 @@
 #include <atomic>
 #include <thread>
 #include <iostream>
+#include <cassert>
 #include <array> //array because of speed do not use vector//
 /// //////////////////////////
 
@@ -32,6 +33,7 @@ class bitvavo {
 	std::atomic<bool> updatePrice;
 	CryptoMarketData* crypto_price_data = new CryptoMarketData[server::MarketDataSize];
 	requestHandler reqHandle;
+	bool problemFlag = false;
 	std::string targetPrice;
 	inline void request_data_from_server(const std::string&& api_link) noexcept {
 			CURL* curl;
@@ -108,7 +110,13 @@ class bitvavo {
 			}
 			sr_it += 3; //skip
 			if (firstTime) {
-				crypto_price_data[index++].set_market(marketTMP).set_price(priceTMP);
+				if (index < server::MarketDataSize) {
+					crypto_price_data[index++].set_market(marketTMP).set_price(priceTMP);
+				}
+				else {
+					++index;
+					problemFlag = true;
+				}
 			}
 			else{
 				needsUpdate(index,priceTMP);
@@ -117,6 +125,11 @@ class bitvavo {
 		} while (sr_it != server::serverData.end());
 		if(firstTime) {
 			firstTime = false;
+
+			if (problemFlag) {
+			  std::cerr << "YOU MUST CHANGE 'MarketDataSize' Variable To : " << index << " To Solve This Termination\n";
+			  exit(-1);
+			}
 			printMarkets();
 		}
 		/*printCrypto_data();*/ //optional just as an example

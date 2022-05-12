@@ -2,15 +2,16 @@
 #define CryptoMarketData_H
 ////////////////////
 #include <string>
+#include "bitvavo.h"
 ///////////////////
 
 ///Basic Data organize class///
 
 class CryptoMarketData
 {
-	std::string market;
+	
 	std::string price;
-
+	std::string market;
 public:
 	inline CryptoMarketData(std::string market_temp,std::string price_temp):market(market_temp),price(price_temp) {
 	}
@@ -23,13 +24,11 @@ public:
 	inline constexpr void update_price(const std::string&& newPrice) noexcept {
 		this->price = newPrice;
 	}
-
-	inline constexpr std::string get_price() noexcept {
-		return this->price;
-	}
-
-	inline constexpr std::string get_market() noexcept {
+	inline constexpr std::string get_market() noexcept{
 		return this->market;
+	}
+	inline constexpr std::string get_price() noexcept {
+			return this->price;
 	}
 	inline constexpr CryptoMarketData& set_price(std::string tmpPrice) noexcept {
 		this->price = std::move(tmpPrice);

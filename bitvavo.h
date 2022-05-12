@@ -22,16 +22,17 @@ namespace server {
 		serverData.append((const char*)contents, realsize);
 		return realsize;
 	}
-	const constexpr uint_fast8_t MarketDataSize = 241;//change this value to the Cryptocurrency count of bitvavo// 
+	const constexpr uint_fast16_t MarketDataSize = 241;//change this value to the Cryptocurrency count of bitvavo// 
 	//currently 241 is the most recent value
 };
 
 class bitvavo {
 	std::thread priceThread;
+	bool firstTime = true;
 	std::atomic<bool> updatePrice;
 	CryptoMarketData* crypto_price_data = new CryptoMarketData[server::MarketDataSize];
 	requestHandler reqHandle;
-
+	std::string targetPrice;
 	inline void request_data_from_server(const std::string&& api_link) noexcept {
 			CURL* curl;
 			CURLcode res;
@@ -55,30 +56,45 @@ class bitvavo {
 
 			++reqHandle;//inc request count after operation
 			return;
-		}//can be reused for other functions from the api// use move r-value for performance benefit
 
+	}//can be reused for other functions from the api// use move r-value for performance benefit
+
+	/*
 	inline void printCrypto_data() noexcept{
 		     
 		{
-			system("cls");// Windows XP >
-			system("clear"); //Linux and MacOS 
-			for (uint_fast8_t i = 0; i < server::MarketDataSize; ++i) {
+			//system("cls");// Windows XP >
+			//system("clear"); //Linux and MacOS 
+			for (uint_fast16_t i = 0; i < server::MarketDataSize; ++i) {
 				std::cout << "Market: " << crypto_price_data[i].get_market() <<
-					"   Price: " << crypto_price_data[i].get_price() <<"\n";
+					"   Price: " << crypto_price_data[i].get_price() << "  index: "<< i << "\n";
 			}
-
 		}//optional but just for testing
 
 	}
+	*/
+	inline constexpr void printMarkets() noexcept {
+		for (uint_fast16_t i = 0; i < server::MarketDataSize; ++i)
+			std::cout << "Market: " << crypto_price_data[i].get_market() << " | CODE: " << i << "\n";
+		
+		return;
+	}
+
+	inline constexpr void needsUpdate(const uint_fast16_t& index,const std::string& tempPrice) noexcept {
+		if (crypto_price_data[index].get_price() != tempPrice)
+			crypto_price_data[index].update_price(std::move(tempPrice));
+
+		return;
+	}//checks if there is an change in price if so it will update else do noting
 
 	inline void fix_JSON() noexcept {
 		
 		request_data_from_server(std::move("https://api.bitvavo.com/v2/ticker/price"));
 		server::serverData.erase(server::serverData.begin() + 1);//erasing first character
 		std::string::iterator sr_it = server::serverData.begin();
-		uint_fast8_t index = 0;
+		uint_fast16_t index = 0;
 		do {
-			sr_it += 12; //skip
+			sr_it += 11; //skip
 			std::string marketTMP;
 			while (*sr_it != '"') {
 				marketTMP += *sr_it;
@@ -91,10 +107,19 @@ class bitvavo {
 				++sr_it;
 			}
 			sr_it += 3; //skip
-			crypto_price_data[index++].set_market(marketTMP).set_price(priceTMP);
+			if (firstTime) {
+				crypto_price_data[index++].set_market(marketTMP).set_price(priceTMP);
+			}
+			else{
+				needsUpdate(index,priceTMP);
+				++index;
+		    }
 		} while (sr_it != server::serverData.end());
-
-		printCrypto_data(); //optional just as an example
+		if(firstTime) {
+			firstTime = false;
+			printMarkets();
+		}
+		/*printCrypto_data();*/ //optional just as an example
 
 		return;
 	}//gives meaning to Json data
@@ -110,10 +135,11 @@ public:
 		++reqHandle;
 		this->priceThread = std::move(std::thread(std::move([&]() {
 			updatePrice.store(true, std::memory_order_relaxed);
-			while (updatePrice.load(std::memory_order_acquire)) {
+			do {
 				reqHandle.mayContinue();
-				 fix_JSON();
-			}   }
+				fix_JSON();
+			} while (updatePrice.load(std::memory_order_acquire));
+			}
 
 		)));
 	}

@@ -18,10 +18,12 @@ class requestHandler {
 		return (requestCount.load(std::memory_order_relaxed) >= 1000) ? true : false;
 	}
 	inline void reset_restart() noexcept {
+		std::cout << "reset_restart\n";
 		requestCount.store(0, std::memory_order_relaxed);
 		start_time = std::move((time_t)time(NULL));
 	}
 	inline const void wait_reset_restart() noexcept {
+		std::cout << "wait reset restart\n";
 		if (((uint_fast16_t)time(NULL) - start_time) < 60) {
 			std::this_thread::sleep_for(std::chrono::seconds(60 - ((uint_fast16_t)time(NULL) - start_time)));
 		}

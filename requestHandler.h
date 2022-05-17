@@ -1,7 +1,6 @@
 #ifndef REQUESTHANDLER_H
 #define REQUESTHANDLER_H
 ///////////////////////
-#include <atomic>
 #include <thread>
 #include <ctime>
 //////////////////////
@@ -9,17 +8,17 @@
 ///request handling algorithm///
 
 class requestHandler {
-	std::atomic<uint_fast16_t> requestCount;
+	uint_fast16_t requestCount;
 	time_t start_time;
 	inline constexpr bool aboveLimit() noexcept {
 		return (((int)((time_t)time(NULL) - start_time)) >= 60) ? true : false;
 	}
 	inline const constexpr bool aboveRequestCount() noexcept{
-		return (requestCount.load(std::memory_order_relaxed) >= 1000) ? true : false;
+		return (requestCount >= 1000) ? true : false;
 	}
 	inline void reset_restart() noexcept {
 		std::cout << "reset_restart\n";
-		requestCount.store(0, std::memory_order_relaxed);
+		requestCount = 0;
 		start_time = std::move((time_t)time(NULL));
 	}
 	inline const void wait_reset_restart() noexcept {
@@ -32,7 +31,7 @@ class requestHandler {
 public:
 	requestHandler() = default;
 	inline void start_() noexcept {
-		requestCount.store(0, std::memory_order_relaxed);
+		requestCount = 0;
 		start_time = (time_t)time(NULL);
 	}
 	 inline void mayContinue() noexcept {
@@ -55,7 +54,7 @@ public:
 	}
 
 	inline void operator++() {
-		this->requestCount.fetch_add(1,std::memory_order_relaxed);
+		++requestCount;
 	}
 };
 

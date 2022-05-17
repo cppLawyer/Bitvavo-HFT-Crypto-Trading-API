@@ -5,12 +5,11 @@
 #include "CryptoMarketData.h"
 #include "requestHandler.h"
 #include "curl/curl.h";
-#include <atomic>
 #include <thread>
 #include <iostream>
 #include <cassert>
-#include <array> //array because of speed do not use vector//
-/// //////////////////////////
+#include <array>
+//////////////////////////////
 
 ///MAIN HEADERFILE///
 
@@ -23,17 +22,17 @@ namespace server {
 		serverData.append((const char*)contents, realsize);
 		return realsize;
 	}
-	const constexpr uint_fast16_t MarketDataSize = 241;//change this value to the Cryptocurrency count of bitvavo// 
-	//currently 241 is the most recent value
+	const constexpr uint_fast16_t MarketDataSize = 241;/* IMPORTANT: Only Change if there is an error on screen, follow the instructions*/ 
+
 };
 
 class bitvavo {
 	std::thread priceThread;
 	bool firstTime = true;
-	std::atomic<bool> updatePrice;
+	bool updatePrice;
 	CryptoMarketData* crypto_price_data = new CryptoMarketData[server::MarketDataSize];
 	requestHandler reqHandle;
-	bool problemFlag = false;
+	bool problemFlag = false; //optional if there is no error
 	std::string targetPrice;
 	inline void request_data_from_server(const std::string&& api_link) noexcept {
 			CURL* curl;
@@ -53,7 +52,7 @@ class bitvavo {
 					std::cerr << "Problem Requesting Data From Server\n";
 					exit(-1);
 				}
-			}//optional if you are sure it works
+			}//optional if you are sure it works removing will enhance performance
 
 
 			++reqHandle;//inc request count after operation
@@ -61,20 +60,6 @@ class bitvavo {
 
 	}//can be reused for other functions from the api// use move r-value for performance benefit
 
-	/*
-	inline void printCrypto_data() noexcept{
-		     
-		{
-			//system("cls");// Windows XP >
-			//system("clear"); //Linux and MacOS 
-			for (uint_fast16_t i = 0; i < server::MarketDataSize; ++i) {
-				std::cout << "Market: " << crypto_price_data[i].get_market() <<
-					"   Price: " << crypto_price_data[i].get_price() << "  index: "<< i << "\n";
-			}
-		}//optional but just for testing
-
-	}
-	*/
 	inline constexpr void printMarkets() noexcept {
 		for (uint_fast16_t i = 0; i < server::MarketDataSize; ++i)
 			std::cout << "Market: " << crypto_price_data[i].get_market() << " | CODE: " << i << "\n";
@@ -87,7 +72,7 @@ class bitvavo {
 			crypto_price_data[index].update_price(std::move(tempPrice));
 
 		return;
-	}//checks if there is an change in price if so it will update else do noting
+	}
 
 	inline void fix_JSON() noexcept {
 		
@@ -129,10 +114,12 @@ class bitvavo {
 			if (problemFlag) {
 			  std::cerr << "YOU MUST CHANGE 'MarketDataSize' Variable To : " << index << " To Solve This Termination\n";
 			  exit(-1);
-			}
+			}//optional if there is no error
+			
+			
 			printMarkets();
 		}
-		/*printCrypto_data();*/ //optional just as an example
+		
 
 		return;
 	}//gives meaning to Json data
@@ -147,22 +134,22 @@ public:
 		fix_JSON();
 		++reqHandle;
 		this->priceThread = std::move(std::thread(std::move([&]() {
-			updatePrice.store(true, std::memory_order_relaxed);
+			updatePrice = true;
 			do {
 				reqHandle.mayContinue();
 				fix_JSON();
-			} while (updatePrice.load(std::memory_order_acquire));
+			} while (updatePrice);
 			}
 
 		)));
 	}
 	inline void stop() noexcept{
-		updatePrice.store(false, std::memory_order_release);//release to ensure sync, relaxed would be faster
+		updatePrice = false;
 		priceThread.join();
 	}
 	inline ~bitvavo() noexcept{
-		if (updatePrice.load(std::memory_order_relaxed) == true) {
-			updatePrice.store(false, std::memory_order_release); //release to ensure sync, relaxed would be faster
+		if (updatePrice == true) {
+			updatePrice = false;
 			if (priceThread.joinable())
 				  priceThread.join();
 

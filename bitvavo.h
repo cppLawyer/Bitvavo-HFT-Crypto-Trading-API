@@ -148,7 +148,7 @@ public:
 		priceThread.join();
 	}
 	inline ~bitvavo() noexcept{
-		if (updatePrice == true) {
+		if (updatePrice) {
 			updatePrice = false;
 			if (priceThread.joinable())
 				  priceThread.join();

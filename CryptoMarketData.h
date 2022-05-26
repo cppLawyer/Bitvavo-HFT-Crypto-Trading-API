@@ -30,9 +30,8 @@ public:
 	inline constexpr std::string get_price() noexcept {
 			return this->price;
 	}
-	inline constexpr CryptoMarketData& set_price(std::string tmpPrice) noexcept {
+	inline constexpr void set_price(std::string tmpPrice) noexcept {
 		this->price = std::move(tmpPrice);
-		return *this;
 	}
 	inline constexpr CryptoMarketData& set_market(std::string tmpMarket) noexcept {
 		this->market = std::move(tmpMarket);

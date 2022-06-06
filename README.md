@@ -21,12 +21,14 @@ EXAMPLE:
 
 int main() {
 
-	bitvavo bit;
-	bit.start();
-	std::cin.get();
-	bit.stop();
-	return 0;
-
-	
+   bitvavo bit;
+   
+   bit.start();
+   
+   std::cin.get();
+   
+   bit.stop();
+   
+   return 0;	
 }
 ```
